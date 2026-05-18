@@ -1,17 +1,10 @@
-name: 🗄️ Database Migrate
+name: Migrate Database
 
 on:
   workflow_dispatch:
     inputs:
-      environment:
-        description: 'Target environment'
-        required: true
-        type: choice
-        options:
-          - production
-          - staging
       confirm:
-        description: 'Type MIGRATE to confirm you want to run migrations'
+        description: 'Type MIGRATE to confirm'
         required: true
         type: string
 
@@ -20,89 +13,66 @@ permissions:
   issues: write
 
 jobs:
-  validate-input:
-    name: ✅ Validate Confirmation
+  validate:
+    name: Validate
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 2
+
     steps:
-      - name: ✅ Check confirmation text
+      - name: Check confirmation
         run: |
-          if [ "${{ inputs.confirm }}" != "MIGRATE" ]; then
-            echo "::error::Confirmation text must be exactly 'MIGRATE' (uppercase). Got: '${{ inputs.confirm }}'"
-            echo "This safeguard prevents accidental migration runs."
+          if [ "${{ github.event.inputs.confirm }}" != "MIGRATE" ]; then
+            echo "You must type MIGRATE exactly to proceed."
             exit 1
           fi
-          echo "✅ Confirmation accepted. Proceeding with migration against ${{ inputs.environment }}."
 
   migrate:
-    name: 🗄️ Run Migrations (${{ inputs.environment }})
+    name: Migrate
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-    needs: validate-input
-    environment: ${{ inputs.environment }}
+    timeout-minutes: 10
+    needs: validate
+
     steps:
-      - name: 📥 Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: 📦 Setup pnpm
+      - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10
 
-      - name: 🟢 Setup Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
 
-      - name: 📥 Install db package dependencies
-        run: pnpm --filter "@lucyn/db" install
+      - name: Install db package
+        run: pnpm --filter @lucyn/db install --frozen-lockfile
 
-      - name: 🗄️ Generate Prisma client
-        run: pnpm --filter "@lucyn/db" run db:generate
+      - name: Generate Prisma client
+        run: pnpm --filter @lucyn/db exec prisma generate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
-      - name: 📋 Show pending migrations
-        run: pnpm --filter "@lucyn/db" exec prisma migrate status
+      - name: Show pending migrations
+        run: pnpm --filter @lucyn/db exec prisma migrate status
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
-      - name: 🗄️ Run migrations
-        run: pnpm --filter "@lucyn/db" exec prisma migrate deploy
+      - name: Apply migrations
+        run: pnpm --filter @lucyn/db exec prisma migrate deploy
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
-      - name: ✅ Verify migration
-        run: pnpm --filter "@lucyn/db" exec prisma migrate status
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
-      - name: 🚨 Create failure issue
+      - name: Open issue on failure
         if: failure()
         uses: actions/github-script@v7
         with:
           script: |
-            const date = new Date().toISOString().split('T')[0];
-            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `🚨 Migration failed on ${date} (${context.payload.inputs.environment})`,
-              body: [
-                `## Migration Failure`,
-                ``,
-                `A database migration failed on **${context.payload.inputs.environment}** on ${date}.`,
-                ``,
-                `**Actions run:** ${runUrl}`,
-                `**Triggered by:** @${context.actor}`,
-                `**Branch:** \`${context.ref}\``,
-                ``,
-                `## Next Steps`,
-                ``,
-                `1. Check the Actions run linked above for the full error output`,
-                `2. Verify the database is in a consistent state with \`prisma migrate status\``,
-                `3. Fix the failing migration before retrying`,
-              ].join('\n'),
-              labels: ['bug', 'priority:high'],
-            });
+              title: `Migration failed — ${new Date().toISOString().split('T')[0]}`,
+              body: `The migration workflow failed.\n\nRun: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              labels: ['bug', 'database']
+            })
