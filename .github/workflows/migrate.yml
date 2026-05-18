@@ -1,0 +1,57 @@
+name: Database Migrate
+
+# Manual-only — never auto-migrate production.
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        type: choice
+        options:
+          - production
+          - staging
+        required: true
+        default: staging
+      confirm:
+        description: 'Type "migrate" to confirm'
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  migrate:
+    name: Run Prisma migrations
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Validate confirmation
+        run: |
+          if [ "${{ inputs.confirm }}" != "migrate" ]; then
+            echo "Confirmation text must be exactly 'migrate'. Got: ${{ inputs.confirm }}"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm --filter "@lucyn/db" run db:generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Run migrations
+        run: pnpm --filter "@lucyn/db" exec prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}

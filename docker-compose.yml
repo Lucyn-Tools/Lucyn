@@ -1,0 +1,34 @@
+# Lucyn — Local development services
+#
+# Brings up a PostgreSQL database for local development.
+# The web app and Discord bot run via pnpm (not Docker) during development.
+#
+# Usage:
+#   docker compose up -d      # Start PostgreSQL
+#   docker compose down -v    # Stop and remove volumes
+#
+# Connection string for apps:
+#   DATABASE_URL=postgresql://lucyn:lucyn@localhost:5432/lucyn
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: lucyn-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: lucyn
+      POSTGRES_PASSWORD: lucyn
+      POSTGRES_DB: lucyn
+    volumes:
+      - lucyn-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lucyn -d lucyn"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  lucyn-postgres-data:
+    name: lucyn-postgres-data

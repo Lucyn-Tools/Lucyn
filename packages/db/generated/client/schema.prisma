@@ -1,0 +1,267 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── MULTI-TENANT ────────────────────────────────────────────
+
+model Organization {
+  id             String   @id @default(cuid())
+  name           String
+  slug           String   @unique
+  githubOrgId    String?  @unique
+  discordGuildId String?  @unique
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  members      OrgMember[]
+  repos        Repository[]
+  developers   Developer[]
+  sprints      Sprint[]
+  meetings     Meeting[]
+  tasks        Task[]
+  embeddings   Embedding[]
+  chatSessions ChatSession[]
+}
+
+model OrgMember {
+  id     String  @id @default(cuid())
+  userId String
+  orgId  String
+  role   OrgRole @default(MEMBER)
+
+  org Organization @relation(fields: [orgId], references: [id])
+
+  @@unique([userId, orgId])
+}
+
+enum OrgRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+// ─── GITHUB DATA ─────────────────────────────────────────────
+
+model Repository {
+  id          String   @id @default(cuid())
+  orgId       String
+  githubId    Int      @unique
+  name        String
+  fullName    String
+  description String?
+  language    String?
+  isPrivate   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  org          Organization  @relation(fields: [orgId], references: [id])
+  commits      Commit[]
+  pullRequests PullRequest[]
+  embeddings   Embedding[]
+}
+
+model Developer {
+  id            String   @id @default(cuid())
+  orgId         String
+  githubLogin   String
+  githubId      Int
+  name          String?
+  avatarUrl     String?
+  discordUserId String?
+  strengths     String[]
+  currentLoad   Int      @default(0)
+  burnoutSignal Float    @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  org             Organization  @relation(fields: [orgId], references: [id])
+  commits         Commit[]
+  pullRequests    PullRequest[]
+  taskAssignments Task[]
+
+  @@unique([orgId, githubLogin])
+}
+
+model Commit {
+  id           String   @id @default(cuid())
+  repoId       String
+  developerId  String
+  sha          String   @unique
+  message      String
+  additions    Int      @default(0)
+  deletions    Int      @default(0)
+  filesChanged Int      @default(0)
+  committedAt  DateTime
+
+  repo      Repository @relation(fields: [repoId], references: [id])
+  developer Developer  @relation(fields: [developerId], references: [id])
+}
+
+model PullRequest {
+  id           String    @id @default(cuid())
+  repoId       String
+  authorId     String
+  githubId     Int
+  number       Int
+  title        String
+  body         String?
+  state        PRState   @default(OPEN)
+  reviewCycles Int       @default(0)
+  additions    Int       @default(0)
+  deletions    Int       @default(0)
+  mergedAt     DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  repo         Repository   @relation(fields: [repoId], references: [id])
+  author       Developer    @relation(fields: [authorId], references: [id])
+  feedbackSent PRFeedback[]
+}
+
+enum PRState {
+  OPEN
+  CLOSED
+  MERGED
+}
+
+model PRFeedback {
+  id             String   @id @default(cuid())
+  prId           String
+  feedbackType   String
+  content        String
+  sentViaDiscord Boolean  @default(false)
+  accepted       Boolean?
+  createdAt      DateTime @default(now())
+
+  pr PullRequest @relation(fields: [prId], references: [id])
+}
+
+// ─── MEETINGS ─────────────────────────────────────────────────
+
+model Meeting {
+  id          String      @id @default(cuid())
+  orgId       String
+  title       String
+  meetingType MeetingType @default(SCRUM)
+  transcript  String?
+  summary     String?
+  goals       String[]
+  blockers    String[]
+  decisions   String[]
+  occurredAt  DateTime
+  createdAt   DateTime    @default(now())
+
+  org   Organization @relation(fields: [orgId], references: [id])
+  tasks Task[]
+}
+
+enum MeetingType {
+  SCRUM
+  PLANNING
+  RETROSPECTIVE
+  STANDUP
+  OTHER
+}
+
+// ─── TASKS ────────────────────────────────────────────────────
+
+model Task {
+  id          String     @id @default(cuid())
+  orgId       String
+  meetingId   String?
+  assigneeId  String?
+  title       String
+  description String?
+  complexity  Int        @default(1)
+  status      TaskStatus @default(SUGGESTED)
+  confidence  Float      @default(0)
+  approvedBy  String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  org      Organization @relation(fields: [orgId], references: [id])
+  meeting  Meeting?     @relation(fields: [meetingId], references: [id])
+  assignee Developer?   @relation(fields: [assigneeId], references: [id])
+}
+
+enum TaskStatus {
+  SUGGESTED
+  APPROVED
+  REJECTED
+  IN_PROGRESS
+  DONE
+}
+
+// ─── SPRINT ───────────────────────────────────────────────────
+
+model Sprint {
+  id             String   @id @default(cuid())
+  orgId          String
+  name           String
+  startDate      DateTime
+  endDate        DateTime
+  summary        String?
+  velocity       Float?
+  predictability Float?
+  createdAt      DateTime @default(now())
+
+  org Organization @relation(fields: [orgId], references: [id])
+}
+
+// ─── AI MEMORY ────────────────────────────────────────────────
+
+model Embedding {
+  id         String          @id @default(cuid())
+  orgId      String
+  repoId     String?
+  sourceType EmbeddingSource
+  sourceId   String
+  content    String
+  metadata   Json            @default("{}")
+  createdAt  DateTime        @default(now())
+
+  org  Organization @relation(fields: [orgId], references: [id])
+  repo Repository?  @relation(fields: [repoId], references: [id])
+
+  @@index([orgId, sourceType])
+}
+
+enum EmbeddingSource {
+  COMMIT
+  PULL_REQUEST
+  MEETING_TRANSCRIPT
+  DISCORD_MESSAGE
+  REPOSITORY_FILE
+  SPRINT_SUMMARY
+  DEVELOPER_SUMMARY
+}
+
+// ─── CHAT ─────────────────────────────────────────────────────
+
+model ChatSession {
+  id        String   @id @default(cuid())
+  userId    String
+  orgId     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  org      Organization  @relation(fields: [orgId], references: [id])
+  messages ChatMessage[]
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  sessionId String
+  role      String
+  content   String
+  sources   Json     @default("[]")
+  createdAt DateTime @default(now())
+
+  session ChatSession @relation(fields: [sessionId], references: [id])
+}

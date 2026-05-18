@@ -1,0 +1,20 @@
+{
+  "name": "@lucyn/github",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@lucyn/db": "workspace:*",
+    "@octokit/rest": "^21.0.0",
+    "@octokit/webhooks": "^13.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  }
+}

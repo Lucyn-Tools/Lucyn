@@ -1,0 +1,7 @@
+[build]
+builder = "nixpacks"
+buildCommand = "pnpm install && pnpm --filter discord-bot build"
+
+[deploy]
+startCommand = "pnpm --filter discord-bot start"
+restartPolicyType = "always"
