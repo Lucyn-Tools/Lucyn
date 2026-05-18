@@ -1,0 +1,47 @@
+name: ✨ Feature Request
+description: Suggest a new feature for Lucyn
+title: '[Feature]: '
+labels: ['enhancement']
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: What pain point does this feature address?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: How should this work?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Which surface does this affect?
+      options:
+        - Web app (dashboard)
+        - Web app (chatbot)
+        - Discord bot
+        - GitHub integration
+        - Task assignment
+        - Meeting agent
+        - Leadership dashboard
+        - Multiple surfaces
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: How important is this to you?
+      options:
+        - Nice to have
+        - Important
+        - Critical for my use case
+    validations:
+      required: true

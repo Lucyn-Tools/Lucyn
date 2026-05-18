@@ -1,2 +1,14 @@
-# Lucyn codeowners
-* @lucyn-ai/maintainers
+# Global fallback — maintainers review everything
+*                           @lucyn-ai/maintainers
+
+# AI package — critical reasoning logic, review carefully
+/packages/ai/               @lucyn-ai/maintainers
+
+# Database schema — migrations are irreversible
+/packages/db/prisma/        @lucyn-ai/maintainers
+
+# GitHub Actions workflows — security sensitive
+/.github/                   @lucyn-ai/maintainers
+
+# Discord bot — handles developer-facing communications
+/apps/discord-bot/          @lucyn-ai/maintainers

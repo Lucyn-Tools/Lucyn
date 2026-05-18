@@ -1,4 +1,7 @@
-name: Deploy Discord Bot
+name: 🤖 Deploy Discord Bot
+
+env:
+  NODE_VERSION: '20'
 
 on:
   push:
@@ -11,22 +14,68 @@ on:
 
 permissions:
   contents: read
+  statuses: write
 
 concurrency:
-  group: deploy-bot-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  deploy:
-    name: Deploy to Railway
+  deploy-bot:
+    name: 🚂 Deploy to Railway
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
 
-      - name: Install Railway CLI
-        run: npm install -g @railway/cli
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
 
-      - name: Deploy Discord bot
-        run: railway up --service discord-bot
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: 📥 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🗄️ Generate Prisma client
+        run: pnpm --filter "@lucyn/db" run db:generate
         env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: 🔨 Build Discord bot
+        run: pnpm --filter "discord-bot" run build
+
+      - name: 🚂 Deploy to Railway
+        uses: bervProject/railway-deploy@v1.3.0
+        with:
+          railway_token: ${{ secrets.RAILWAY_TOKEN }}
+          service: lucyn-discord-bot
+
+      - name: 💬 Comment deployment success
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: `✅ Discord bot deployed to Railway successfully.`
+            })
+
+      - name: 💬 Comment deployment failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: `❌ Discord bot deployment to Railway failed. Check the [Actions run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}) for details.`
+            })

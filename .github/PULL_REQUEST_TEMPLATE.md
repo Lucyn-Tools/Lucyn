@@ -1,30 +1,31 @@
-## Summary
-
-<!-- What does this PR do? 1-3 bullet points. -->
-
--
+## What does this PR do?
+<!-- Describe the changes and why you made them -->
 
 ## Type of change
+- [ ] 🐛 Bug fix
+- [ ] ✨ New feature
+- [ ] 🔨 Refactor
+- [ ] 📝 Documentation
+- [ ] 🔧 Config / CI change
+- [ ] ⚡ Performance improvement
 
-- [ ] Bug fix
-- [ ] New feature
-- [ ] Refactor
-- [ ] Docs / config only
-- [ ] Dependency update
+## How to test
+<!-- Steps to verify this works -->
 
 ## Checklist
-
-- [ ] `pnpm typecheck` passes across all packages
+- [ ] I've run `pnpm typecheck` and it passes
+- [ ] I've run `pnpm lint` and it passes
+- [ ] I've removed all `console.log` statements
 - [ ] New/changed API routes validate `orgId` before any DB query
 - [ ] Developer feedback code only sends via private Discord DMs
-- [ ] No hardcoded org-specific data
 - [ ] `.env.example` updated if new env vars added
 - [ ] Prisma schema changes include a migration
+- [ ] I've added/updated tests if relevant
+- [ ] I've updated documentation if relevant
+- [ ] This PR has a clear, descriptive title following conventional commits format
 
-## Testing
+## Screenshots (if UI changes)
+<!-- Paste before/after screenshots here -->
 
-<!-- How did you test this? -->
-
-## Related
-
-- Closes #
+## Related issues
+<!-- Closes #123 -->
