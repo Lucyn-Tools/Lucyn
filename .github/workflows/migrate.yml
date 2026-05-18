@@ -19,6 +19,10 @@ permissions:
   contents: read
   issues: write
 
+concurrency:
+  group: migrate-${{ github.event.inputs.environment }}
+  cancel-in-progress: false
+
 jobs:
   validate:
     name: Validate
