@@ -3,6 +3,13 @@ name: Migrate Database
 on:
   workflow_dispatch:
     inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - production
+          - staging
       confirm:
         description: 'Type MIGRATE to confirm'
         required: true
@@ -31,6 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: validate
+    environment: ${{ inputs.environment }}
 
     steps:
       - name: Checkout
@@ -49,11 +57,6 @@ jobs:
 
       - name: Generate Prisma client
         run: pnpm --filter @lucyn/db exec prisma generate
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
-      - name: Show pending migrations
-        run: pnpm --filter @lucyn/db exec prisma migrate status
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
