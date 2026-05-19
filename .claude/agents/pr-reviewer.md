@@ -55,7 +55,7 @@ Skipping this step produces shallow reviews that miss architectural/consistency 
 - Frontend env reads through `apps/web/src/lib/` helpers — no inline `process.env` in components.
 - Files under ~500 lines preferred.
 
-**Testing** — new behavior ships with tests (Vitest / `cargo test` / `tests/json_rpc_e2e.rs`). Behavior over implementation. No real network, no time flakes. Coverage on branches/error paths.
+**Testing** — new behavior ships with tests (Vitest / React Testing Library). Behavior over implementation. No real network, no time flakes. Coverage on branches/error paths.
 
 **Debug logging** — entry/exit on new flows, branches, retries, state transitions. Grep-friendly prefixes. No secrets/PII.
 
@@ -108,11 +108,11 @@ sequenceDiagram
 
 ### 🛑 Blockers
 
-#### 1. `path/to/file.rs:42-56` — <short title>
+#### 1. `path/to/file.ts:42-56` — <short title>
 <2–5 line explanation of the issue, why it's wrong, and what the downstream effect is.>
 
 **Suggested change:**
-```rust
+```typescript
 // before
 <snippet showing current code>
 
@@ -144,7 +144,7 @@ sequenceDiagram
 
 ## Verified / looks good
 <Short bullets of things you explicitly checked and consider correct — signals the review was thorough, not just looking for things to complain about.>
-- Error paths in `foo.rs` propagate `RpcOutcome<T>` correctly.
+- Error paths in `foo.ts` return correct HTTP status codes.
 - New Vitest in `Foo.test.tsx` exercises the empty + error states.
 
 ---
@@ -164,7 +164,7 @@ Rules for the review content:
 - Before/after code blocks should be minimal — just enough to show the change.
 - Prefer quoting exact identifiers/paths from the code over vague descriptions.
 - Do not invent issues. If the PR is clean, say so in the walkthrough and keep the sections short.
-- Do not repeat what `cargo clippy` / ESLint would catch unless the PR introduced it and CI hasn't caught it yet — focus on issues a human reviewer would flag.
+- Do not repeat what ESLint / TypeScript would catch unless the PR introduced it and CI hasn't caught it yet — focus on issues a human reviewer would flag.
 
 ### 7. Apply approved fixes
 
@@ -221,10 +221,7 @@ pnpm --filter web run build
 ### Quality suite
 - typecheck: pass/fail
 - lint: pass/fail (N autofixes)
-- unit tests: <passed>/<total>
-- cargo check (core): pass/fail
-- cargo check (tauri): pass/fail
-- cargo test: <passed>/<total>
+- build: pass/fail
 
 ### Outstanding questions for the author
 - <list, or "none">

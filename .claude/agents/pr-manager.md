@@ -79,11 +79,11 @@ Classify each comment:
 Also do a standards pass against `CLAUDE.md` on the full diff, as a safety net for anything reviewers missed:
 
 - Every DB query must be scoped to `orgId` — looked up via `prisma.orgMember.findFirst` after `auth()`.
-- Controllers exposed via `schemas.rs` + registry, not ad-hoc branches in `core/cli.rs` / `core/jsonrpc.rs`.
-- No dynamic `import()` in production `app/src` code.
-- Frontend reads `VITE_*` via `app/src/utils/config.ts`, not `import.meta.env` directly.
-- `app/src-tauri` is desktop-only; no Android/iOS branches there.
-- Debug logging present on new flows; no secrets logged.
+- Developer feedback is sent via private Discord DMs only — never to public channels.
+- No raw source code stored permanently — embeddings + metadata only.
+- `pnpm typecheck` must pass across all packages (compression, github, ai, discord-bot, web).
+- Prisma client must be regenerated after schema changes.
+- Frontend reads env via established helpers — no inline `process.env` spread across components.
 - Files under ~500 lines preferred.
 
 ### 4b. Apply fixes (REQUIRED — this is the core of the job)
@@ -100,25 +100,21 @@ For CodeRabbit-style `suggestion` blocks, you may apply them directly if the sug
 
 Run in parallel where independent. Capture output; do not swallow failures.
 
-```
-# Frontend
-cd app && pnpm typecheck
-cd app && pnpm lint
-cd app && pnpm format       # auto-fix
-cd app && pnpm test:unit
-
-# Rust
-cargo fmt --manifest-path Cargo.toml
-cargo check --manifest-path Cargo.toml
-cargo check --manifest-path app/src-tauri/Cargo.toml
-cargo test --manifest-path Cargo.toml   # if changes touch Rust
+```bash
+pnpm --filter "@lucyn/compression" run typecheck
+pnpm --filter "@lucyn/github" run typecheck
+pnpm --filter "@lucyn/ai" run typecheck
+pnpm --filter "discord-bot" run typecheck
+pnpm --filter "web" run typecheck
+pnpm --filter web run lint
+pnpm --filter web run build
 ```
 
-Skip suites that are clearly unrelated to the diff (e.g., skip `cargo test` for a docs-only PR), but always run formatters and typecheck/lint.
+Skip suites that are clearly unrelated to the diff, but always run formatters and typecheck/lint.
 
 ### 6. Auto-fix and commit
 
-- If `pnpm format` or `cargo fmt` produced changes: stage only those files and commit with:
+- If `pnpm format` produced changes: stage only those files and commit with:
   ```
   chore(pr-manager): apply formatting
   ```
@@ -209,10 +205,7 @@ Branch: <headRefName>  Base: <baseRefName>  Author: <login>
 - typecheck: pass/fail
 - lint: pass/fail (N autofixes)
 - format: N files reformatted
-- unit tests: <passed>/<total>
-- cargo check (core): pass/fail
-- cargo check (tauri): pass/fail
-- cargo test: <passed>/<total> (if run)
+- build: pass/fail
 
 ### Commits pushed
 - <sha> chore(pr-manager): apply formatting

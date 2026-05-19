@@ -1,9 +1,7 @@
 # Build artifacts
 target/
-app/src-tauri/target/
 
 # Node / frontend (not needed for core binary)
-app/
 node_modules/
 dist/
 .vite/
@@ -23,7 +21,6 @@ dist/
 .github/
 docs/
 *.md
-!Cargo.lock
 
 # Environment / secrets
 .env

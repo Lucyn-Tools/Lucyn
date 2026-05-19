@@ -4,17 +4,8 @@ This directory is intentionally near-empty.
 
 Authoritative docs for AI agents and contributors:
 
-- **[`CLAUDE.md`](../../CLAUDE.md)** — repo layout, runtime scope, commands, frontend/Tauri/Rust conventions, testing, debug logging, feature workflow.
-- **[`AGENTS.md`](../../AGENTS.md)** — RPC controller patterns, `RpcOutcome<T>` contract.
+- **[`CLAUDE.md`](../../CLAUDE.md)** — repo layout, commands, architecture, deployment, privacy rules.
 - **[`.claude/memory.md`](../memory.md)** — project memory: fixes, gotchas, strict rules, workflow notes.
-- **[`gitbooks/developing/architecture.md`](../../gitbooks/developing/architecture.md)** — narrative architecture, dual-socket sync.
-- **[`gitbooks/developing/architecture/frontend.md`](../../gitbooks/developing/architecture/frontend.md)** — frontend layout.
-- **[`gitbooks/developing/architecture/tauri-shell.md`](../../gitbooks/developing/architecture/tauri-shell.md)** — Tauri shell.
-- **[`gitbooks/developing/architecture/agent-harness.md`](../../gitbooks/developing/architecture/agent-harness.md)** — agent harness / tool surface.
-- **[`gitbooks/developing/e2e-testing.md`](../../gitbooks/developing/e2e-testing.md)** — WDIO/Appium testing.
-- **[`gitbooks/developing/cef.md`](../../gitbooks/developing/cef.md)** — CEF runtime notes.
-- **[`gitbooks/developing/testing-strategy.md`](../../gitbooks/developing/testing-strategy.md)** — testing strategy.
-- **[`gitbooks/developing/agent-observability.md`](../../gitbooks/developing/agent-observability.md)** — agent observability.
 
 ## When to add a file here
 

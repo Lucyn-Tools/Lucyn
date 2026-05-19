@@ -122,7 +122,7 @@ If a test fails on apparent flake, rerun once. If it still fails, stop and repor
 
 ### 6. Commit auto-fixes
 
-- `pnpm format` / `cargo fmt` changes → `chore(pr-manager): apply formatting`.
+- `pnpm format` changes → `chore(pr-manager): apply formatting`.
 - Non-trivial lint autofixes → `chore(pr-manager): lint autofix`.
 - Reviewer-driven fixes → `fix(<area>): ...`.
 - Never `--no-verify`. Never amend. Never force-push.
@@ -170,7 +170,7 @@ Branch: <local-branch>  PR head: <headRefName>  Base: <baseRefName>  Author: <lo
 - pass/warn/fail items with file:line
 
 ### Checks
-- typecheck / lint / format / unit tests / cargo check (core) / cargo check (tauri) / cargo test
+- typecheck / lint / format / build
 
 ### Commits pushed
 - <sha> <subject>

@@ -209,9 +209,6 @@ flake8 . && black --check . && mypy . && pytest
 # Java
 mvn checkstyle:check && mvn compile && mvn test
 
-# Rust
-cargo fmt --check && cargo clippy && cargo test
-
 # Go
 golint ./... && go vet ./... && go test ./...
 ```
