@@ -1,3 +1,10 @@
+import path from "path";
+import { config as loadEnv } from "dotenv";
+
+// Load from root .env for local development.
+// Railway injects env vars directly in production.
+loadEnv({ path: path.resolve(__dirname, "../../../.env") });
+
 import {
   Client,
   GatewayIntentBits,

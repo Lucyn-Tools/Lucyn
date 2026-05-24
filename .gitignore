@@ -10,10 +10,17 @@ out/
 dist/
 build/
 
-# Environment variables
+# Environment variables — never commit these
 .env
 .env.local
 .env.*.local
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Keep example files
+!.env.example
+!**/.env.example
 
 # IDE
 .vscode/

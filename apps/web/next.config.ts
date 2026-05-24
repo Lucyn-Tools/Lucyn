@@ -1,4 +1,10 @@
 import type { NextConfig } from "next";
+import path from "path";
+import { config as loadEnv } from "dotenv";
+
+// Load from root .env for local development.
+// Production reads from Vercel environment variables directly.
+loadEnv({ path: path.resolve(__dirname, "../../.env") });
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@lucyn/ai", "@lucyn/db", "@lucyn/github", "@lucyn/compression"],
