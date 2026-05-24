@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@clerk/nextjs": "^6.9.0",
+    "@clerk/nextjs": "^6.39.3",
     "@lucyn/ai": "workspace:*",
     "@lucyn/compression": "workspace:*",
     "@lucyn/db": "workspace:*",
