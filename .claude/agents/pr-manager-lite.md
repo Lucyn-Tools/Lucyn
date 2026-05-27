@@ -110,7 +110,7 @@ Run in parallel where independent. Skip suites unrelated to the diff, but always
 pnpm --filter "@lucyn/compression" run typecheck
 pnpm --filter "@lucyn/github" run typecheck
 pnpm --filter "@lucyn/ai" run typecheck
-pnpm --filter "discord-bot" run typecheck
+pnpm --filter "@lucyn-tools/discord-bot" run typecheck
 pnpm --filter "web" run typecheck
 
 # Web app
