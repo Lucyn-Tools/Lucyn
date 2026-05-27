@@ -121,7 +121,7 @@ If the loop reaches the hard cap, stop and report the PR URL, current CI snapsho
 pnpm --filter "@lucyn/compression" run typecheck
 pnpm --filter "@lucyn/github" run typecheck
 pnpm --filter "@lucyn/ai" run typecheck
-pnpm --filter "discord-bot" run typecheck
+pnpm --filter "@lucyn-tools/discord-bot" run typecheck
 pnpm --filter "web" run typecheck
 pnpm --filter web run lint
 pnpm --filter web run build

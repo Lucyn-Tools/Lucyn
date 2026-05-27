@@ -30,7 +30,7 @@ COPY apps/discord-bot/ ./apps/discord-bot/
 RUN pnpm --filter "@lucyn/db" run db:generate
 
 # Build the Discord bot
-RUN pnpm --filter "discord-bot" run build
+RUN pnpm --filter "@lucyn-tools/discord-bot" run build
 
 # Production image
 FROM node:20-alpine AS runtime

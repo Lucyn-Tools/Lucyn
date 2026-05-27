@@ -104,7 +104,7 @@ Run in parallel where independent. Capture output; do not swallow failures.
 pnpm --filter "@lucyn/compression" run typecheck
 pnpm --filter "@lucyn/github" run typecheck
 pnpm --filter "@lucyn/ai" run typecheck
-pnpm --filter "discord-bot" run typecheck
+pnpm --filter "@lucyn-tools/discord-bot" run typecheck
 pnpm --filter "web" run typecheck
 pnpm --filter web run lint
 pnpm --filter web run build

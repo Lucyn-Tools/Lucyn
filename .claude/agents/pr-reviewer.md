@@ -187,7 +187,7 @@ Run in parallel where independent. Skip suites clearly unrelated to the diff; al
 pnpm --filter "@lucyn/compression" run typecheck
 pnpm --filter "@lucyn/github" run typecheck
 pnpm --filter "@lucyn/ai" run typecheck
-pnpm --filter "discord-bot" run typecheck
+pnpm --filter "@lucyn-tools/discord-bot" run typecheck
 pnpm --filter "web" run typecheck
 
 # Web app quality

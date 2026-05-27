@@ -1,5 +1,5 @@
 {
-  "name": "discord-bot",
+  "name": "@lucyn-tools/discord-bot",
   "version": "0.1.0",
   "private": true,
   "main": "./src/index.ts",

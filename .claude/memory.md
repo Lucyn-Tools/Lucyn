@@ -26,11 +26,11 @@ Quick reference for anyone starting with Claude on this project.
 pnpm install                              # Install all deps
 pnpm --filter "@lucyn/db" run db:generate # Regenerate Prisma client
 pnpm --filter web dev                     # Next.js dev server (localhost:3000)
-pnpm --filter discord-bot dev             # Discord bot with tsx watch
+pnpm --filter @lucyn-tools/discord-bot dev             # Discord bot with tsx watch
 pnpm --filter "@lucyn/compression" run typecheck
 pnpm --filter "@lucyn/github" run typecheck
 pnpm --filter "@lucyn/ai" run typecheck
-pnpm --filter "discord-bot" run typecheck
+pnpm --filter "@lucyn-tools/discord-bot" run typecheck
 pnpm --filter "web" run typecheck
 ```
 
