@@ -122,9 +122,9 @@ pnpm --filter "@lucyn/compression" run typecheck
 pnpm --filter "@lucyn/github" run typecheck
 pnpm --filter "@lucyn/ai" run typecheck
 pnpm --filter "@lucyn-tools/discord-bot" run typecheck
-pnpm --filter "web" run typecheck
-pnpm --filter web run lint
-pnpm --filter web run build
+pnpm --filter "@lucyn-tools/web" run typecheck
+pnpm --filter @lucyn-tools/web run lint
+pnpm --filter @lucyn-tools/web run build
 ```
 
 Prefer targeted typecheck commands when the touched area is narrow, but do not claim validation passed if a command was not run.

@@ -28,7 +28,7 @@ pnpm lint                 # ESLint all packages
 pnpm format               # Prettier write
 
 # Web app only
-pnpm --filter web dev     # Start Next.js dev server at localhost:3000
+pnpm --filter @lucyn-tools/web dev     # Start Next.js dev server at localhost:3000
 
 # Discord bot only
 pnpm --filter @lucyn-tools/discord-bot dev   # Start bot with tsx watch
@@ -152,7 +152,7 @@ All AI-generated content has a `✦ Lucyn` purple label.
 
 ## Deployment
 
-- **Web app:** Vercel. Build command: `pnpm --filter web build`
+- **Web app:** Vercel. Build command: `pnpm --filter @lucyn-tools/web build`
 - **Discord bot:** Railway. Start command: `pnpm --filter @lucyn-tools/discord-bot start`
 - **Database:** Railway PostgreSQL
 - **Auth:** Clerk (multi-tenant)

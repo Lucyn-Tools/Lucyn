@@ -1,5 +1,5 @@
 {
-  "buildCommand": "pnpm --filter web build",
+  "buildCommand": "pnpm --filter @lucyn-tools/web build",
   "outputDirectory": "apps/web/.next",
   "framework": "nextjs"
 }
