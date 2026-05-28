@@ -9,7 +9,13 @@ export async function POST(request: NextRequest) {
   const event = request.headers.get("x-github-event");
   const deliveryId = request.headers.get("x-github-delivery");
 
-  if (!signature || !validateWebhookSignature(payload, signature, process.env.GITHUB_WEBHOOK_SECRET ?? "")) {
+  const secret = process.env.GITHUB_WEBHOOK_SECRET;
+  if (!secret) {
+    console.error(`[webhook] GITHUB_WEBHOOK_SECRET is not configured | delivery: ${deliveryId}`);
+    return NextResponse.json({ error: "Webhook secret not configured" }, { status: 500 });
+  }
+
+  if (!signature || !validateWebhookSignature(payload, signature, secret)) {
     console.warn(`[webhook] Invalid signature for delivery ${deliveryId}`);
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
