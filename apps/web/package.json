@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "pnpm --filter '@lucyn/compression' build && pnpm --filter '@lucyn/ai' build && pnpm --filter '@lucyn/github' build",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
