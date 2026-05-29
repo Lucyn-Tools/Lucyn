@@ -29,6 +29,12 @@ COPY apps/discord-bot/ ./apps/discord-bot/
 # Generate Prisma client
 RUN pnpm --filter "@lucyn/db" run db:generate
 
+# Build workspace packages in dependency order so their dist/ JS is
+# available when Node resolves require('@lucyn/*') at runtime.
+RUN pnpm --filter "@lucyn/compression" build
+RUN pnpm --filter "@lucyn/ai" build
+RUN pnpm --filter "@lucyn/github" build
+
 # Build the Discord bot
 RUN pnpm --filter "@lucyn-tools/discord-bot" run build
 
