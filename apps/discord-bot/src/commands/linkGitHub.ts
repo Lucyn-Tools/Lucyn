@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js";
-import { prisma } from "@lucyn/db";
+import { prisma } from "../lib/db";
 import type { BotCommand } from "../index";
 
 export const linkGitHub: BotCommand = {

@@ -2,7 +2,7 @@
   "name": "@lucyn/db",
   "version": "0.1.0",
   "main": "./index.js",
-  "types": "./index.ts",
+  "types": "./index.d.ts",
   "scripts": {
     "db:migrate": "dotenv -e ../../.env -- prisma migrate dev",
     "db:generate": "dotenv -e ../../.env -- prisma generate",
