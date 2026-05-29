@@ -1,0 +1,14 @@
+[phases.setup]
+nixPkgs = ["nodejs_20"]
+
+[phases.install]
+cmds = [
+  "npm install -g pnpm@11.2.2",
+  "cd ../.. && pnpm install --frozen-lockfile"
+]
+
+[phases.build]
+cmds = ["cd ../.. && pnpm --filter @lucyn-tools/discord-bot build"]
+
+[start]
+cmd = "cd ../.. && pnpm --filter @lucyn-tools/discord-bot start"

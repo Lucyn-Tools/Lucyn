@@ -1,0 +1,7 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "cd ../.. && pnpm --filter @lucyn-tools/discord-bot start"
+restartPolicyType = "always"
+restartPolicyMaxRetries = 3
