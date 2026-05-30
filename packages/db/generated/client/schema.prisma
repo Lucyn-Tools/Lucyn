@@ -106,7 +106,7 @@ model PullRequest {
   id           String    @id @default(cuid())
   repoId       String
   authorId     String
-  githubId     Int
+  githubId     Int       @unique
   number       Int
   title        String
   body         String?

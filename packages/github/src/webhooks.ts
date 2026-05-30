@@ -50,3 +50,14 @@ export interface PullRequestEvent {
   };
   repository: { id: number; full_name: string };
 }
+
+export interface PullRequestReviewEvent {
+  action: "submitted" | "edited" | "dismissed";
+  review: {
+    id: number;
+    state: "approved" | "changes_requested" | "commented";
+    user: { login: string; id: number };
+  };
+  pull_request: { id: number; number: number };
+  repository: { id: number; full_name: string };
+}

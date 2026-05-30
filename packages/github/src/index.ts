@@ -5,6 +5,7 @@ export type {
   GitHubWebhookEventType,
   PushEvent,
   PullRequestEvent,
+  PullRequestReviewEvent,
 } from "./webhooks";
 export {
   analyzeCommitMessage,
@@ -12,4 +13,5 @@ export {
   analyzeBurnoutSignal,
 } from "./analysis";
 export type { CommitHygieneScore, PRHealthScore, DeveloperLoadScore } from "./analysis";
-export { ingestRepository, ingestCommit, upsertDeveloper } from "./ingest";
+export { ingestRepository, ingestCommit, upsertDeveloper, ingestPullRequest, incrementPRReviewCycles } from "./ingest";
+export { ingestCommitDetail, syncRepoCommits } from "./sync";

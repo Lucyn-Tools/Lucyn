@@ -17163,12 +17163,12 @@ export namespace Prisma {
 
   export type PullRequestWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    githubId?: number
     AND?: PullRequestWhereInput | PullRequestWhereInput[]
     OR?: PullRequestWhereInput[]
     NOT?: PullRequestWhereInput | PullRequestWhereInput[]
     repoId?: StringFilter<"PullRequest"> | string
     authorId?: StringFilter<"PullRequest"> | string
-    githubId?: IntFilter<"PullRequest"> | number
     number?: IntFilter<"PullRequest"> | number
     title?: StringFilter<"PullRequest"> | string
     body?: StringNullableFilter<"PullRequest"> | string | null
@@ -17181,7 +17181,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"PullRequest"> | Date | string
     repo?: XOR<RepositoryScalarRelationFilter, RepositoryWhereInput>
     author?: XOR<DeveloperScalarRelationFilter, DeveloperWhereInput>
-  }, "id">
+  }, "id" | "githubId">
 
   export type PullRequestOrderByWithAggregationInput = {
     id?: SortOrder

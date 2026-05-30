@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { validateWebhookSignature } from "@lucyn/github";
-import type { PushEvent, PullRequestEvent } from "@lucyn/github";
+import {
+  validateWebhookSignature,
+  createOctokitClient,
+  ingestCommitDetail,
+  ingestPullRequest,
+  incrementPRReviewCycles,
+  upsertDeveloper,
+} from "@lucyn/github";
+import type { PushEvent, PullRequestEvent, PullRequestReviewEvent } from "@lucyn/github";
+import { prisma } from "@lucyn/db";
 
 export async function POST(request: NextRequest) {
   const payload = await request.text();
@@ -31,15 +39,27 @@ export async function POST(request: NextRequest) {
 
   switch (event) {
     case "push":
-      handlePush(body as unknown as PushEvent);
+      try {
+        await handlePush(body as unknown as PushEvent);
+      } catch (err) {
+        console.error(`[webhook] Push ingestion failed | delivery: ${deliveryId}`, err);
+      }
       break;
 
     case "pull_request":
-      handlePullRequest(body as unknown as PullRequestEvent);
+      try {
+        await handlePullRequest(body as unknown as PullRequestEvent);
+      } catch (err) {
+        console.error(`[webhook] PR ingestion failed | delivery: ${deliveryId}`, err);
+      }
       break;
 
     case "pull_request_review":
-      handlePullRequestReview(body);
+      try {
+        await handlePullRequestReview(body as unknown as PullRequestReviewEvent);
+      } catch (err) {
+        console.error(`[webhook] PR review ingestion failed | delivery: ${deliveryId}`, err);
+      }
       break;
 
     case "ping":
@@ -53,24 +73,84 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ received: true }, { status: 200 });
 }
 
-// Stubs — full ingestion logic comes in issues #11 and #12.
-
-function handlePush(body: PushEvent) {
+async function handlePush(body: PushEvent): Promise<void> {
   const { ref, repository, commits } = body;
-  console.log(`[webhook] Push to ${ref} in ${repository.full_name} — ${commits.length} commit(s)`);
-  // TODO (issue #11): trigger commit ingestion pipeline
+
+  if (commits.length === 0) return;
+
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) {
+    console.error("[webhook/push] GITHUB_TOKEN not configured");
+    return;
+  }
+
+  const dbRepo = await prisma.repository.findUnique({
+    where: { githubId: repository.id },
+    select: { id: true, orgId: true },
+  });
+
+  if (!dbRepo) {
+    console.warn(`[webhook/push] ${repository.full_name} not found in DB — skipping`);
+    return;
+  }
+
+  const [owner, repo] = repository.full_name.split("/");
+  const octokit = createOctokitClient(token);
+
+  await Promise.all(
+    commits.map((commit) =>
+      ingestCommitDetail(octokit, dbRepo.orgId, dbRepo.id, owner, repo, commit.id)
+    )
+  );
+
+  console.log(`[webhook/push] Ingested ${commits.length} commit(s) from ${ref} in ${repository.full_name}`);
 }
 
-function handlePullRequest(body: PullRequestEvent) {
-  const { action, number, pull_request, repository } = body;
-  console.log(`[webhook] PR #${number} ${action} in ${repository.full_name}: "${pull_request.title}"`);
-  // TODO (issue #12): trigger PR ingestion pipeline
+async function handlePullRequest(body: PullRequestEvent): Promise<void> {
+  const { action, pull_request: pr, repository } = body;
+
+  const dbRepo = await prisma.repository.findUnique({
+    where: { githubId: repository.id },
+    select: { id: true, orgId: true },
+  });
+
+  if (!dbRepo) {
+    console.warn(`[webhook/pull_request] ${repository.full_name} not found in DB — skipping`);
+    return;
+  }
+
+  if (action === "review_requested") {
+    await incrementPRReviewCycles(pr.id);
+    console.log(`[webhook/pull_request] PR #${pr.number} review cycle++ in ${repository.full_name}`);
+    return;
+  }
+
+  const authorId = await upsertDeveloper(dbRepo.orgId, pr.user.login, pr.user.id, null, null);
+  const state: "OPEN" | "CLOSED" | "MERGED" = pr.merged
+    ? "MERGED"
+    : pr.state === "closed"
+      ? "CLOSED"
+      : "OPEN";
+
+  await ingestPullRequest(
+    dbRepo.id,
+    authorId,
+    pr.id,
+    pr.number,
+    pr.title,
+    pr.body,
+    state,
+    pr.additions,
+    pr.deletions,
+    pr.merged_at ? new Date(pr.merged_at) : null
+  );
+
+  console.log(`[webhook/pull_request] PR #${pr.number} ${action} → ${state} in ${repository.full_name}`);
 }
 
-function handlePullRequestReview(body: Record<string, unknown>) {
-  const action = body.action as string;
-  const pr = body.pull_request as Record<string, unknown>;
-  const repo = (body.repository as Record<string, unknown>)?.full_name;
-  console.log(`[webhook] PR review ${action} on PR #${pr?.number} in ${repo}`);
-  // TODO (issue #12): update PR review cycle count
+async function handlePullRequestReview(body: PullRequestReviewEvent): Promise<void> {
+  const { action, review, pull_request: pr, repository } = body;
+  console.log(
+    `[webhook/pull_request_review] ${review.state} review ${action} on PR #${pr.number} in ${repository.full_name}`
+  );
 }
