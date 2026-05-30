@@ -97,13 +97,25 @@ async function handlePush(body: PushEvent): Promise<void> {
   const [owner, repo] = repository.full_name.split("/");
   const octokit = createOctokitClient(token);
 
-  await Promise.all(
+  const results = await Promise.allSettled(
     commits.map((commit) =>
       ingestCommitDetail(octokit, dbRepo.orgId, dbRepo.id, owner, repo, commit.id)
     )
   );
 
-  console.log(`[webhook/push] Ingested ${commits.length} commit(s) from ${ref} in ${repository.full_name}`);
+  let ingested = 0;
+  for (const [i, result] of results.entries()) {
+    if (result.status === "fulfilled") {
+      ingested++;
+    } else {
+      console.error(
+        `[webhook/push] Commit ${commits[i].id} failed in ${repository.full_name}:`,
+        result.reason
+      );
+    }
+  }
+
+  console.log(`[webhook/push] Ingested ${ingested}/${commits.length} commit(s) from ${ref} in ${repository.full_name}`);
 }
 
 async function handlePullRequest(body: PullRequestEvent): Promise<void> {
@@ -116,12 +128,6 @@ async function handlePullRequest(body: PullRequestEvent): Promise<void> {
 
   if (!dbRepo) {
     console.warn(`[webhook/pull_request] ${repository.full_name} not found in DB — skipping`);
-    return;
-  }
-
-  if (action === "review_requested") {
-    await incrementPRReviewCycles(pr.id);
-    console.log(`[webhook/pull_request] PR #${pr.number} review cycle++ in ${repository.full_name}`);
     return;
   }
 
@@ -144,6 +150,10 @@ async function handlePullRequest(body: PullRequestEvent): Promise<void> {
     pr.deletions,
     pr.merged_at ? new Date(pr.merged_at) : null
   );
+
+  if (action === "review_requested") {
+    await incrementPRReviewCycles(pr.id);
+  }
 
   console.log(`[webhook/pull_request] PR #${pr.number} ${action} → ${state} in ${repository.full_name}`);
 }
